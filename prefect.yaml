@@ -1,0 +1,39 @@
+# Prefect project configuration
+name: prefect-migration
+prefect-version: 2.14.0
+
+# Build configuration - Build Docker image
+build:
+  - prefect_docker.deployments.steps.build_docker_image:
+      id: build-image
+      requires: prefect-docker>=0.3.0
+      image_name: "{{ image_name }}"
+      tag: "{{ tag }}"
+      dockerfile: Dockerfile
+
+# Push configuration - Push Docker image to registry
+push:
+  - prefect_docker.deployments.steps.push_docker_image:
+      requires: prefect-docker>=0.3.0
+      image_name: "{{ build-image.image_name }}"
+      tag: "{{ build-image.tag }}"
+
+# Pull configuration - Not needed for Docker-based deployments
+pull: null
+
+# Deployment definitions
+deployments:
+  - name: ats-sync-error-report
+    version: null
+    tags: []
+    description: "Daily ATS sync error report sent to Slack"
+    entrypoint: flow.py:ats_sync_error_report_flow
+    parameters: {}
+    work_pool:
+      name: default_pool
+      job_variables:
+        image: "{{ build-image.image }}"
+    schedule:
+      cron: "0 9 * * *"  # Runs daily at 9 AM UTC
+      timezone: "UTC"
+      day_or: true
