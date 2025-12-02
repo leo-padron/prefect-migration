@@ -2,24 +2,17 @@
 name: prefect-migration
 prefect-version: 2.14.0
 
-# Build configuration - Build Docker image
-build:
-  - prefect_docker.deployments.steps.build_docker_image:
-      id: build-image
-      requires: prefect-docker>=0.3.0
-      image_name: "{{ image_name }}"
-      tag: "{{ tag }}"
-      dockerfile: Dockerfile
+# Build configuration
+build: null
 
-# Push configuration - Push Docker image to registry
-push:
-  - prefect_docker.deployments.steps.push_docker_image:
-      requires: prefect-docker>=0.3.0
-      image_name: "{{ build-image.image_name }}"
-      tag: "{{ build-image.tag }}"
+# Push configuration
+push: null
 
-# Pull configuration - Not needed for Docker-based deployments
-pull: null
+# Pull configuration - Clone from GitHub
+pull:
+  - prefect.deployments.steps.git_clone:
+      repository: https://github.com/leo-padron/prefect-migration.git
+      branch: master
 
 # Deployment definitions
 deployments:
@@ -31,8 +24,6 @@ deployments:
     parameters: {}
     work_pool:
       name: default_pool
-      job_variables:
-        image: "{{ build-image.image }}"
     schedule:
       cron: "0 9 * * *"  # Runs daily at 9 AM UTC
       timezone: "UTC"
