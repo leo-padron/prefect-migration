@@ -24,6 +24,12 @@ deployments:
     parameters: {}
     work_pool:
       name: default_pool
+      job_variables:
+        pip_packages:
+          - "pandas>=2.1.0"
+          - "matplotlib>=3.6.0"
+          - "seaborn>=0.13.0"
+          - "prefect-slack>=0.2.0"
     schedule:
       cron: "0 9 * * *"  # Runs daily at 9 AM UTC
       timezone: "UTC"
